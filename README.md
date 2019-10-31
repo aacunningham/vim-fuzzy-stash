@@ -1,8 +1,8 @@
 # Fuzzy Stash
 
-A small plugin to add the ability to stash file changes in git. This plugin is inspired by [fzf.vim](), using [fzf](#) for its UI to make stash management simple.
+A small plugin to add the ability to stash file changes in git. This plugin is inspired by [fzf.vim](https://github.com/junegunn/fzf.vim), using [fzf](https://github.com/junegunn/fzf) for its UI to make stash management simple.
 
-This plugin doesn't aim to do much more than stash, but if you're using [vim-fugitive](#) like I am, it's one of the few commands you'll be missing.
+This plugin doesn't aim to do much more than stash, but if you're using [vim-fugitive](https://github.com/tpope/vim-fugitive) like I am, it's one of the few commands you'll be missing.
 
 ### Features
 
@@ -16,7 +16,7 @@ This plugin depends on fzf for it's UI. Other than that, almost any version of v
 
 ### Installation
 
-Using [vim-plug](#), it's as simple as:
+Using [vim-plug](https://github.com/junegunn/vim-plug), it's as simple as:
 
 `Plug 'aacunningham/vim-fuzzy-stash'`
 
