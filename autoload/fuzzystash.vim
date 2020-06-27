@@ -1,6 +1,9 @@
-let s:stash_actions = {
-  \ 'ctrl-d': 'git stash drop ',
-  \ 'ctrl-a': 'git stash pop ', }
+let s:actions = {
+  \ 'pop': 'git stash pop ',
+  \ 'drop': 'git stash drop ',
+  \ 'apply': 'git stash apply ', }
+
+let s:stash_actions = get(g:, 'fuzzy_stash_actions', { 'ctrl-d': 'drop', 'ctrl-a': 'pop', 'ctrl-p': 'apply' })
 
 function! s:get_git_root()
     let root = split(system('git rev-parse --show-toplevel'), '\n')[0]
@@ -12,9 +15,9 @@ function! s:stash_sink(lines)
         return
     endif
 
-    let drop = a:lines[0] == 'ctrl-d'
-    let cmd = get(s:stash_actions, a:lines[0], 'echo ')
-    if drop
+    let action = get(s:stash_actions, a:lines[0])
+    let cmd = get(s:actions, action, 'echo ')
+    if cmd == s:actions.drop
         for idx in range(len(a:lines) - 1, 1, -1)
             let stash = matchstr(a:lines[idx], 'stash@{[0-9]\+}')
             call system(cmd.stash)
@@ -24,7 +27,6 @@ function! s:stash_sink(lines)
         call system(cmd.stash)
         checktime
     endif
-        
 endfunction
 
 function! fuzzystash#create_stash(...)
@@ -50,15 +52,20 @@ function! fuzzystash#list_stash(...)
     endif
     let source = 'git stash list'
     let expect_keys = join(keys(s:stash_actions), ',')
+    let actions = s:translate_actions(s:stash_actions)
     let options = {
     \ 'source': source,
     \ 'sink*': function('s:stash_sink'),
     \ 'options': ['--ansi', '--multi', '--tiebreak=index', '--reverse',
     \   '--inline-info', '--prompt', 'Stashes> ', '--header',
-    \   ':: Press CTRL-D to drop stash', '--expect='.expect_keys,
+    \   ':: ' . actions, '--expect='.expect_keys,
     \   '--preview', 'grep -o "stash@{[0-9]\+}" <<< {} | xargs git stash show --format=format: -p --color=always']
     \ }
     return fzf#run(fzf#wrap("Test", options, 0))
+endfunction
+
+function! s:translate_actions(action_dict)
+    return join(map(items(a:action_dict), 'toupper(v:val[0]) . " to " . v:val[1]'), ', ')
 endfunction
 
 
