@@ -1,12 +1,12 @@
 let s:actions = {
-  \ 'pop': 'git stash pop ',
-  \ 'drop': 'git stash drop ',
-  \ 'apply': 'git stash apply ', }
+  \ 'pop': 'stash pop ',
+  \ 'drop': 'stash drop ',
+  \ 'apply': 'stash apply ', }
 
 let s:stash_actions = get(g:, 'fuzzy_stash_actions', { 'ctrl-d': 'drop', 'ctrl-a': 'pop', 'ctrl-p': 'apply' })
 
 function! s:get_git_root()
-    let root = split(system('git rev-parse --show-toplevel'), '\n')[0]
+    let root = systemlist(FugitiveShellCommand() . ' rev-parse --show-toplevel')[0]
     return v:shell_error ? '' : root
 endfunction
 
@@ -20,11 +20,11 @@ function! s:stash_sink(lines)
     if cmd == s:actions.drop
         for idx in range(len(a:lines) - 1, 1, -1)
             let stash = matchstr(a:lines[idx], 'stash@{[0-9]\+}')
-            call system(cmd.stash)
+            call system(FugitiveShellCommand() . ' ' . cmd . stash)
         endfor
     else
         let stash = matchstr(a:lines[1], 'stash@{[0-9]\+}')
-        call system(cmd.stash)
+        call system(FugitiveShellCommand() . ' ' . cmd . stash)
         checktime
     endif
 endfunction
@@ -39,7 +39,7 @@ function! fuzzystash#create_stash(...)
     else
         let name = '' 
     endif
-    let str = split(system('git stash push '.name), '\n')[0]
+    let str = systemlist(FugitiveShellCommand() . ' stash push ' . name)[0]
     checktime
     redraw
     echo str
@@ -50,7 +50,7 @@ function! fuzzystash#list_stash(...)
     if empty(root)
         return 0
     endif
-    let source = 'git stash list'
+    let source = FugitiveShellCommand() . ' stash list'
     let expect_keys = join(keys(s:stash_actions), ',')
     let actions = s:translate_actions(s:stash_actions)
     let options = {
@@ -59,7 +59,7 @@ function! fuzzystash#list_stash(...)
     \ 'options': ['--ansi', '--multi', '--tiebreak=index', '--reverse',
     \   '--inline-info', '--prompt', 'Stashes> ', '--header',
     \   ':: ' . actions, '--expect='.expect_keys,
-    \   '--preview', 'grep -o "stash@{[0-9]\+}" <<< {} | xargs git stash show --format=format: -p --color=always']
+    \   '--preview', 'grep -o "stash@{[0-9]\+}" <<< {} | xargs ' . FugitiveShellCommand() . ' stash show --format=format: -p --color=always']
     \ }
     return fzf#run(fzf#wrap("Test", options, 0))
 endfunction

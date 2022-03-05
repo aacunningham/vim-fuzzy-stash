@@ -13,6 +13,7 @@ This plugin doesn't aim to do much more than stash, but if you're using [vim-fug
 ### Dependencies
 
 This plugin depends on fzf for it's UI. Other than that, almost any version of vim (or neovim) and git should work with this plugin.
+You must also have [vim-fugitive](https://github.com/tpope/vim-fugitive) installed.
 
 ### Installation
 
